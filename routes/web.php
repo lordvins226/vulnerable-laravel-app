@@ -31,6 +31,7 @@ Route::prefix('safe')->group(function () {
 });
 
 // Routes communes
+Route::get('/search', [VulnerableController::class, 'showSearchForm'])->name('search');
 Route::get('/comments', [VulnerableController::class, 'showComments'])->name('comments');
 Route::get('/profile', [VulnerableController::class, 'showProfile'])->name('profile');
 

@@ -7,6 +7,7 @@ use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class VulnerableController extends Controller
 {
@@ -15,12 +16,22 @@ class VulnerableController extends Controller
         return view('login');
     }
 
+    public function showSearchForm()
+    {
+        return view('search');
+    }
+
     // 1. Injection SQL
     public function vulnerableSearch(Request $request)
     {
-        $username = $request->input('username');
-        $users = DB::select("SELECT * FROM users WHERE name LIKE '%$username%'");
-        return view('search_results', ['users' => $users]);
+        $username = $request->input('username', '');
+        $order = $request->input('order', 'name');
+        $limit = $request->input('limit', '10');
+
+        $query = "SELECT id, name, email FROM users WHERE name LIKE '%{$username}%' ORDER BY {$order} LIMIT {$limit}";
+        $users = DB::select($query);
+
+        return view('search', ['users' => $users]);
     }
 
     // 2. XSS (Cross-Site Scripting)
@@ -48,10 +59,9 @@ class VulnerableController extends Controller
         if (!$user) {
             return back()->withErrors(['email' => 'Cet utilisateur n\'existe pas.']);
         }
-        if ($user->password === $request->input('password')) {
-            // Login successful
+        if (Hash::check($request->input('password'), $user->password)) {
             session(['user_id' => $user->id]);
-            return redirect('/profile')->with('status', 'Connecté avec succès!');
+            return redirect('/profile')->with(['status' => 'Connecté avec succès!', 'user' => $user]);
         }
         return back()->withErrors(['password' => 'Mot de passe incorrect.']);
     }

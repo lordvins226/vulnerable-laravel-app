@@ -14,9 +14,30 @@ class SafeController extends Controller
     // 1. Protection contre l'injection SQL
     public function safeSearch(Request $request)
     {
+        // Validate input
+        $validator = Validator::make($request->all(), [
+            'username' => 'nullable|string|max:255',
+            'order' => 'nullable|in:name,email',
+            'limit' => 'nullable|integer|min:1|max:100',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
         $username = $request->input('username');
-        $users = DB::select("SELECT * FROM users WHERE name LIKE ?", ["%$username%"]);
-        return view('search_results', ['users' => $users]);
+        $order = $request->input('order', 'name');
+        $limit = $request->input('limit', 10);
+
+        $users = DB::table('users')
+            ->when($username, function ($query) use ($username) {
+                return $query->where('name', 'LIKE', '%' . $username . '%');
+            })
+            ->orderBy($order)
+            ->limit($limit)
+            ->get();
+
+        return view('search', ['users' => $users]);
     }
 
     public function safeLogin(Request $request)

@@ -6,10 +6,10 @@
         <input type="text" name="username" placeholder="Nom d'utilisateur">
         <button type="submit">Recherche Vulnérable</button>
     </form>
-    <form action="{{ route('safe.search') }}" method="GET">
-        <input type="text" name="username" placeholder="Nom d'utilisateur">
-        <button type="submit">Recherche Sécurisée</button>
-    </form>
+{{--    <form action="{{ route('safe.search') }}" method="GET">--}}
+{{--        <input type="text" name="username" placeholder="Nom d'utilisateur">--}}
+{{--        <button type="submit">Recherche Sécurisée</button>--}}
+{{--    </form>--}}
     @if(isset($users))
         <ul>
             @foreach($users as $user)
